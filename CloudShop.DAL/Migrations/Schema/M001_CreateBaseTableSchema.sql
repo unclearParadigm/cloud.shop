@@ -1,14 +1,15 @@
 CREATE TABLE USERS (
-    ID                          INTEGER     NOT NULL    PRIMARY KEY,
+    ID                          INTEGER     NOT NULL    PRIMARY KEY     AUTOINCREMENT,
     FIRSTNAME                   VARCHAR     NOT NULL,
     LASTNAME                    VARCHAR     NOT NULL,
     EMAIL                       VARCHAR     NOT NULL,
+    CARDNUMBER                  VARCHAR     NOT NULL,
     HASPURCHASEPERMISSIONS      INTEGER     NOT NULL,
     WANTSTORECEIVEBILLINGMAILS  INTEGER     NOT NULL
 );
 
 CREATE TABLE ARTICLES (
-    ID                          INTEGER     NOT NULL    PRIMARY KEY,
+    ID                          INTEGER     NOT NULL    PRIMARY KEY     AUTOINCREMENT,
     ARTICLENAME                 VARCHAR     NOT NULL,
     MANUFACTURER                VARCHAR     NOT NULL,
     
@@ -24,7 +25,7 @@ CREATE TABLE ARTICLES (
 );
 
 CREATE TABLE TRANSACTIONS (
-    ID                          INTEGER     NOT NULL    PRIMARY KEY,
+    ID                          INTEGER     NOT NULL    PRIMARY KEY     AUTOINCREMENT,
     USERID                      INTEGER     NOT NULL,
     ARTICLEID                   INTEGER     NOT NULL,
     QUANTITY                    INTEGER     NOT NULL,
@@ -35,7 +36,7 @@ CREATE TABLE TRANSACTIONS (
 );
 
 CREATE TABLE ARTICLEQUANTITIES (
-    ID                          INTEGER     NOT NULL    PRIMARY KEY,
+    ID                          INTEGER     NOT NULL    PRIMARY KEY     AUTOINCREMENT,
     ARTICLEID                   INTEGER     NOT NULL,
     AVAILABLEQUANTITY           INTEGER     NOT NULL
 );

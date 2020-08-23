@@ -1,0 +1,107 @@
+@page "/articles"
+@using Microsoft.Extensions.Logging
+
+@using CloudShop.BL
+@using CloudShop.BL.Extensions
+@using CloudShop.WebApp.Services
+@using CloudShop.WebApp.Models.ArticleService
+
+@inject ArticleService ArticleService
+@inject TimerService TimerService
+@inject ILogger<Articles> Logger
+
+<div class="container search-term-input-container">
+    <input
+        class="input is-primary"
+        maxlength="20" minlength="3" type="text"
+        @bind-value="SearchTerm"
+        @bind-value:event="oninput"
+        placeholder="Search"/>
+</div>
+
+<div class="container">
+    <div class="columns is-multiline is-centered">
+        @foreach (var article in ArticlesFilteredBySearchTerm)
+        {
+            <div class="column">
+                <div class="card">
+                    <div class="card-image">
+                        <figure class="image is-4by3">
+                            <img src="@article.ArticleImage" alt="@article.ArticleName">
+                        </figure>
+                    </div>
+                    <div class="card-content">
+                        <div class="media">
+                            <div class="media-content">
+                                <p class="title is-4">@article.ArticleName</p>
+                                <span class="tag tag-info subtitle is-4">@article.Price €</span>
+                                <span class="tag tag-info subtitle is-4">@article.Manufacturer</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="is-overlay article-card-add-to-cart-overlay">
+                        <span class="icon is-large has-text-info">
+                            <i class="fa fa-cart-plus"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    /* Blazor Bindings -> Lesson Learned for Textboxes
+     https://github.com/dotnet/aspnetcore/issues/15635
+     you have to add an additional @bind-value:event="oninput" to Input, to update the Value on KeyPress */
+    private IList<ArticleViewModel> _allArticles;
+    private string SearchTerm { get; set; } = string.Empty;
+
+    private IEnumerable<ArticleViewModel> ArticlesFilteredBySearchTerm =>
+        _allArticles.Where(a => IsArticleMatchingSearchTerm(a, SearchTerm));
+
+    protected override void OnInitialized()
+    {
+        Logger.LogDebug($"Initializing {nameof(Articles)}-Page");
+        UpdateAvailableArticles();
+
+        Logger.LogDebug($"Starting Timer for background-updates of Articles-Collection for {nameof(Articles)}-Page");
+        TimerService.SetTimer(TimeSpan.FromSeconds(5));
+        TimerService.OnElapsed += UpdateAvailableArticles;
+    }
+
+    private void UpdateAvailableArticles()
+    {
+        Logger.LogDebug("Updating collection of available Articles");
+        _allArticles = ArticleService.GetArticles().ToList();
+        StateHasChanged();
+    }
+
+    private static bool IsArticleMatchingSearchTerm(ArticleViewModel articleViewModel, string searchTerm)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm)) return true;
+
+        var normalizedSearchTerm = searchTerm.Trim().ToUpperInvariant();
+        var normalizedSearchableArticleFields = new[]
+        {
+            articleViewModel.Manufacturer,
+            articleViewModel.ArticleName,
+            articleViewModel.ArticleId.ToString()
+        }.Select(f => f.Trim().ToUpperInvariant());
+
+        return normalizedSearchableArticleFields
+            .Any(articleField =>
+                articleField.Contains(normalizedSearchTerm)
+                || normalizedSearchTerm.Contains(articleField)
+                || IsArticleFieldALevenshteinMatchWithSearchTerm(articleField, normalizedSearchTerm));
+    }
+
+    private static bool IsArticleFieldALevenshteinMatchWithSearchTerm(string articleField, string searchTerm)
+    {
+        var subTermsOfArticleField = articleField
+            .Split(new[] {',', ' ', ':', '-', ';', '.'}, StringSplitOptions.RemoveEmptyEntries);
+
+        return subTermsOfArticleField.Any(subTerm => Levenshtein.Compute(subTerm, searchTerm) <= 1);
+    }
+
+}

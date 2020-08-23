@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Cloudshop.Domain\Cloudshop.Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="App.Metrics.Abstractions" Version="4.1.0" />
+      <PackageReference Include="AutoMapper" Version="10.0.0" />
+      <PackageReference Include="CSharpFunctionalExtensions" Version="2.10.0" />
+      <PackageReference Include="Dapper" Version="2.0.35" />
+      <PackageReference Include="dbup" Version="4.4.0" />
+      <PackageReference Include="dbup-sqlite" Version="4.4.0" />
+      <PackageReference Include="Microsoft.Data.Sqlite" Version="3.1.6" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.6" />
+      <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="2.19.80" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Migrations\001_CreateBaseTableSchema.sql" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="Migrations\Schema\M001_CreateBaseTableSchema.sql">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
+</Project>
